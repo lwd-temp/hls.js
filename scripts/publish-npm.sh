@@ -19,9 +19,9 @@ if [[ $(node ./scripts/check-already-published.js) = "not published" ]]; then
       exit 1
     fi
     echo "Publishing tag: ${tag}"
-    npm publish --tag "${tag}"
-    curl "https://purge.jsdelivr.net/npm/hls.js@${tag}"
-    echo "Published."
+    # npm publish --tag "${tag}"
+    # curl "https://purge.jsdelivr.net/npm/hls.js@${tag}"
+    # echo "Published."
   fi
 else
   echo "Already published."
