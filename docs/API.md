@@ -40,6 +40,7 @@ See [API Reference](https://hlsjs-dev.video-dev.org/api-docs/) for a complete li
   - [`maxFragLookUpTolerance`](#maxfraglookuptolerance)
   - [`maxMaxBufferLength`](#maxmaxbufferlength)
   - [`liveSyncDurationCount`](#livesyncdurationcount)
+  - [`liveSyncOnStallIncrease`](#livesynconstallincrease)
   - [`liveMaxLatencyDurationCount`](#livemaxlatencydurationcount)
   - [`liveSyncDuration`](#livesyncduration)
   - [`liveMaxLatencyDuration`](#livemaxlatencyduration)
@@ -392,6 +393,7 @@ var config = {
   nudgeMaxRetry: 3,
   maxFragLookUpTolerance: 0.25,
   liveSyncDurationCount: 3,
+  liveSyncOnStallIncrease: 1,
   liveMaxLatencyDurationCount: Infinity,
   liveDurationInfinity: false,
   preferManagedMediaSource: false,
@@ -661,6 +663,17 @@ this is to mimic the browser behaviour (the buffer eviction algorithm is startin
 edge of live delay, expressed in multiple of `EXT-X-TARGETDURATION`.
 if set to 3, playback will start from fragment N-3, N being the last fragment of the live playlist.
 decreasing this value is likely to cause playback stalls.
+
+### `liveSyncOnStallIncrease`
+
+(default: `1`)
+
+increment to the calculated `hls.targetLatency` on each playback stall, expressed in seconds.
+When `liveSyncDuration` is specified in config,
+`hls.targetLatency` is calculated as `liveSyncDuration` plus `liveSyncOnStallIncrease` multiplied by number of stalls.
+Otherwise `hls.targetLatency` is calculated as `liveSyncDurationCount` multiplied by `EXT-X-TARGETDURATION`
+plus `liveSyncOnStallIncrease` multiplied by number of stalls.
+Decreasing this value will mean that each stall will have less affect on `hls.targetLatency`.
 
 ### `liveMaxLatencyDurationCount`
 
@@ -1826,7 +1839,17 @@ returns 0 before first playlist is loaded
 
 ### `hls.targetLatency`
 
-get : target distance from the edge as calculated by the latency controller
+get/set : target distance from the edge as calculated by the latency controller
+
+When `liveSyncDuration` is specified in config,
+`targetLatency` is calculated as `liveSyncDuration` plus `liveSyncOnStallIncrease` multiplied by number of stalls.
+Otherwise `targetLatency` is calculated as `liveSyncDurationCount` multiplied by `EXT-X-TARGETDURATION`
+plus `liveSyncOnStallIncrease` multiplied by number of stalls.
+
+Setting `targetLatency` resets number of stalls to `0` and sets `liveSyncDuration` to the new value.
+Note: if the initial config specified `liveSyncDurationCount` rather than `liveSyncDuration`,
+setting `targetLatency` will assign a new value to `liveSyncDuration`. This value will be used to calculate
+`targetLatency` from now on and `liveSyncDurationCount` will be ignored.
 
 ### `hls.drift`
 
